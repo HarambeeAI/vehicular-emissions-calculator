@@ -8,6 +8,11 @@ async function loadVehicleData() {
     try {
         const response = await fetch('data/vehicle_emissions.json'); // Ensure this file is accessible
         vehicleData = await response.json();
+        
+        if (!vehicleData || typeof vehicleData !== "object") {
+            console.error("Invalid vehicle data format");
+            return;
+        }
         loadMakes(); // Populate dropdown once data is loaded
     } catch (error) {
         console.error("Error loading vehicle data:", error);
@@ -15,15 +20,17 @@ async function loadVehicleData() {
 }
 
 function loadMakes() {
-    if (!vehicleData || Object.keys(vehicleData).length === 0) return;
+    if (!vehicleData || typeof vehicleData !== "object" || Object.keys(vehicleData).length === 0) return;
     const makeSelect = document.getElementById("make");
     makeSelect.innerHTML = '<option value="">-- Select Make --</option>'; // Reset dropdown
     
     Object.keys(vehicleData).forEach(make => {
-        let option = document.createElement("option");
-        option.value = make;
-        option.textContent = make;
-        makeSelect.appendChild(option);
+        if (typeof make === "string") { // Ensure keys are strings
+            let option = document.createElement("option");
+            option.value = make;
+            option.textContent = make;
+            makeSelect.appendChild(option);
+        }
     });
 }
 
