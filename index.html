@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Verst Carbon Vehicular Emissions Calculator</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .container { max-width: 500px; margin: auto; }
+        label { display: block; margin-top: 10px; }
+        select, input, button { width: 100%; padding: 8px; margin-top: 5px; }
+        .result { margin-top: 20px; padding: 10px; background: #f4f4f4; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>The Verst Carbon Vehicular Emissions Calculator</h2>
+        
+        <p><strong>Disclaimer:</strong> The dataset has been taken from Canada Government official open data website. This is a compiled version. This contains data over a period of 7 years.</p>
+        
+        <label for="make">Select Vehicle Make:</label>
+        <select id="make" onchange="loadModels()">
+            <option value="">-- Select Make --</option>
+        </select>
+
+        <label for="model">Select Vehicle Model & Year:</label>
+        <select id="model">
+            <option value="">-- Select Model --</option>
+        </select>
+
+        <label for="distance">Trip Distance (km):</label>
+        <input type="number" id="distance" placeholder="Enter distance in km">
+
+        <label for="mode">Driving Mode:</label>
+        <select id="mode">
+            <option value="city">City driving (stop-and-go traffic)</option>
+            <option value="highway">Highway driving (steady speed)</option>
+            <option value="combined">Mixed (combined rating) (55% city, 45% highway)</option>
+        </select>
+
+        <button onclick="calculateEmissions()">Calculate CO2 Emissions</button>
+        
+        <div class="result" id="result">CO2 Emissions will be displayed here.</div>
+    </div>
+
+    <script>
+        // Placeholder dataset (replace with API call to backend)
+        const vehicleData = {
+            "Toyota": [{ model: "Corolla 2020", fuel: "Gasoline", transmission: "Automatic", city: 7.5, highway: 5.8, combined: 6.7, co2: 150 },
+                        { model: "Camry 2021", fuel: "Gasoline", transmission: "Automatic", city: 8.1, highway: 6.0, combined: 7.0, co2: 160 }],
+            "Honda": [{ model: "Civic 2019", fuel: "Gasoline", transmission: "Manual", city: 7.2, highway: 5.6, combined: 6.5, co2: 140 }]
+        };
+
+        function loadMakes() {
+            const makeSelect = document.getElementById("make");
+            for (let make in vehicleData) {
+                let option = document.createElement("option");
+                option.value = make;
+                option.textContent = make;
+                makeSelect.appendChild(option);
+            }
+        }
+
+        function loadModels() {
+            const make = document.getElementById("make").value;
+            const modelSelect = document.getElementById("model");
+            modelSelect.innerHTML = '<option value="">-- Select Model --</option>';
+            if (make && vehicleData[make]) {
+                vehicleData[make].forEach(vehicle => {
+                    let option = document.createElement("option");
+                    option.value = JSON.stringify(vehicle);
+                    option.textContent = vehicle.model;
+                    modelSelect.appendChild(option);
+                });
+            }
+        }
+
+        function calculateEmissions() {
+            const selectedVehicle = JSON.parse(document.getElementById("model").value);
+            const distance = parseFloat(document.getElementById("distance").value);
+            const mode = document.getElementById("mode").value;
+            
+            if (!selectedVehicle || isNaN(distance) || distance <= 0) {
+                document.getElementById("result").textContent = "Please enter valid inputs.";
+                return;
+            }
+
+            let fuelRate = mode === "city" ? selectedVehicle.city : mode === "highway" ? selectedVehicle.highway : selectedVehicle.combined;
+            let co2Emissions = selectedVehicle.co2 * distance; // CO2 emissions (grams)
+            
+            document.getElementById("result").innerHTML = `
+                <strong>Results:</strong><br>
+                Fuel Type: ${selectedVehicle.fuel} <br>
+                Transmission: ${selectedVehicle.transmission} <br>
+                Fuel Consumption: ${fuelRate} L/100 km <br>
+                Total CO2 Emissions: <strong>${co2Emissions.toFixed(2)} grams</strong>
+            `;
+        }
+
+        window.onload = loadMakes;
+    </script>
+</body>
+</html>
