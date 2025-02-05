@@ -33,9 +33,9 @@ function loadModels() {
     modelSelect.innerHTML = '<option value="">-- Select Model --</option>';
     
     if (make && vehicleData[make]) {
-        vehicleData[make].forEach(vehicle => {
+        vehicleData[make].forEach((vehicle, index) => {
             let option = document.createElement("option");
-            option.value = JSON.stringify(vehicle);
+            option.value = index;  // Store index instead of full JSON
             option.textContent = vehicle.model;
             modelSelect.appendChild(option);
         });
@@ -43,18 +43,21 @@ function loadModels() {
 }
 
 function calculateEmissions() {
-    const selectedVehicle = JSON.parse(document.getElementById("model").value);
+    const make = document.getElementById("make").value;
+    const modelIndex = document.getElementById("model").value;
     const distance = parseFloat(document.getElementById("distance").value);
     const mode = document.getElementById("mode").value;
-    
-    if (!selectedVehicle || isNaN(distance) || distance <= 0) {
+
+    if (!make || modelIndex === "" || isNaN(distance) || distance <= 0) {
         document.getElementById("result").textContent = "Please enter valid inputs.";
         return;
     }
 
+    const selectedVehicle = vehicleData[make][modelIndex]; // Fetch correct vehicle object
+
     let fuelRate = mode === "city" ? selectedVehicle.city : mode === "highway" ? selectedVehicle.highway : selectedVehicle.combined;
     let co2Emissions = selectedVehicle.co2 * distance;
-    
+
     document.getElementById("result").innerHTML = `
         <strong>Results:</strong><br>
         Fuel Type: ${selectedVehicle.fuel} <br>
