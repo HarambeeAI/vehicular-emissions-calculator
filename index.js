@@ -34,26 +34,34 @@ function loadModels() {
     
     if (make && vehicleData[make]) {
         vehicleData[make].forEach((vehicle, index) => {
-            let option = document.createElement("option");
-            option.value = index;  // Store index instead of full JSON
-            option.textContent = vehicle.model;
-            modelSelect.appendChild(option);
+            if (vehicle.model) { // Ensure the vehicle entry has a model field
+                let option = document.createElement("option");
+                option.value = index;  // Store index instead of full JSON
+                option.textContent = vehicle.model;
+                modelSelect.appendChild(option);
+            }
         });
     }
 }
 
 function calculateEmissions() {
     const make = document.getElementById("make").value;
-    const modelIndex = document.getElementById("model").value;
+    let modelIndex = document.getElementById("model").value;
+    modelIndex = parseInt(modelIndex, 10); // Ensure index is an integer
     const distance = parseFloat(document.getElementById("distance").value);
     const mode = document.getElementById("mode").value;
 
-    if (!make || modelIndex === "" || isNaN(distance) || distance <= 0) {
+    if (!make || isNaN(modelIndex) || isNaN(distance) || distance <= 0) {
         document.getElementById("result").textContent = "Please enter valid inputs.";
         return;
     }
 
     const selectedVehicle = vehicleData[make][modelIndex]; // Fetch correct vehicle object
+
+    if (!selectedVehicle) {
+        document.getElementById("result").textContent = "Invalid selection. Please choose a valid vehicle.";
+        return;
+    }
 
     let fuelRate = mode === "city" ? selectedVehicle.city : mode === "highway" ? selectedVehicle.highway : selectedVehicle.combined;
     let co2Emissions = selectedVehicle.co2 * distance;
