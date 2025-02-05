@@ -1,31 +1,37 @@
 document.addEventListener("DOMContentLoaded", function () {
-    loadMakes();
+    loadVehicleData();
 });
 
-const vehicleData = {
-    "Toyota": [
-        { model: "Corolla 2020", fuel: "Gasoline", transmission: "Automatic", city: 7.5, highway: 5.8, combined: 6.7, co2: 150 },
-        { model: "Camry 2021", fuel: "Gasoline", transmission: "Automatic", city: 8.1, highway: 6.0, combined: 7.0, co2: 160 }
-    ],
-    "Honda": [
-        { model: "Civic 2019", fuel: "Gasoline", transmission: "Manual", city: 7.2, highway: 5.6, combined: 6.5, co2: 140 }
-    ]
-};
+let vehicleData = {};
+
+async function loadVehicleData() {
+    try {
+        const response = await fetch('data/vehicle_emissions.json'); // Ensure this file is accessible
+        vehicleData = await response.json();
+        loadMakes(); // Populate dropdown once data is loaded
+    } catch (error) {
+        console.error("Error loading vehicle data:", error);
+    }
+}
 
 function loadMakes() {
+    if (!vehicleData || Object.keys(vehicleData).length === 0) return;
     const makeSelect = document.getElementById("make");
-    for (let make in vehicleData) {
+    makeSelect.innerHTML = '<option value="">-- Select Make --</option>'; // Reset dropdown
+    
+    Object.keys(vehicleData).forEach(make => {
         let option = document.createElement("option");
         option.value = make;
         option.textContent = make;
         makeSelect.appendChild(option);
-    }
+    });
 }
 
 function loadModels() {
     const make = document.getElementById("make").value;
     const modelSelect = document.getElementById("model");
     modelSelect.innerHTML = '<option value="">-- Select Model --</option>';
+    
     if (make && vehicleData[make]) {
         vehicleData[make].forEach(vehicle => {
             let option = document.createElement("option");
